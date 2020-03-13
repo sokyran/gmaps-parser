@@ -26,7 +26,7 @@ class Restaurant:
 	def __str__(self):
 		return f"Name: {self.name} with rating {self.rating}, {self.cost} cost and open at {self.open_hours};"
 	
-	def to_ndarray(self):
+	def to_numpy_array(self):
 		attrs = np.array(
 			[self.name, self.category, self.cost, self.rating, self.num_of_rates, self.open_hours]).reshape(1, -1)
 		tags = np.array([1 if tag in self.pos_tags else 0 if tag in self.neg_tags else 0 for tag in all_possible_tags]
