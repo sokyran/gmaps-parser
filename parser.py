@@ -14,7 +14,7 @@ url = "https://www.google.com.ua/maps/search/Рестораны/@52.2267581,21.0
 
 # Opening driver
 options = Options()
-options.headless = False
+options.headless = True
 driver = webdriver.Firefox(options=options)
 driver.get(url)
 wait = WebDriverWait(driver, 20)
