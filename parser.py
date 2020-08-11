@@ -10,14 +10,15 @@ from models import Restaurant, all_possible_tags
 
 # url of restaurants in area
 # url = "https://www.google.com.ua/maps/search/Рестораны/@50.4766857,30.4726883,11z/"
-url = "https://www.google.com.ua/maps/search/Рестораны/@52.2267581,21.0062611,15z/"
+url = input("Enter url of google maps area:\n")
 
 # Opening driver
 options = Options()
-options.headless = True
+options.headless = False
 driver = webdriver.Firefox(options=options)
 driver.get(url)
 wait = WebDriverWait(driver, 20)
+
 # Setting those booleans to find out on which page driver stopped
 on_details = False
 on_tags = False
@@ -37,7 +38,8 @@ def parse_one_restaurant():
 		
 		# Get all of useful params of this page
 		name = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, 'h1.section-hero-header-title-title'))).text
-		type = driver.find_element_by_css_selector(
+		sleep(1)
+		type_ = driver.find_element_by_css_selector(
 			'div.GLOBAL__gm2-body-2:nth-child(2)>span:nth-child(1)>span:nth-child(1)>button:nth-child(1)').text
 		cost = driver.find_element_by_css_selector(
 			'span.section-rating-term:nth-child(2)>span:nth-child(2)>span:nth-child(1)>span:nth-child(2)').text
@@ -51,7 +53,7 @@ def parse_one_restaurant():
 		try:
 			tags_page.click()
 		except ElementClickInterceptedException:
-			sleep(0.2)
+			sleep(0.4)
 			tags_page.click()
 		on_tags = True
 		on_details = False
@@ -63,7 +65,7 @@ def parse_one_restaurant():
 		all_pos = set(i.text for i in pos) - all_negs
 		
 		# Create new Restaurant class so that all params are gathered together
-		collected_rest = Restaurant(name, type, cost, rating, num, open_hours, all_pos, all_negs)
+		collected_rest = Restaurant(name, type_, cost, rating, num, open_hours, all_pos, all_negs)
 		return collected_rest.to_numpy_array()
 		
 	# Catch an error and so skip current restaurant
@@ -80,16 +82,12 @@ def parse_one_page():
 	
 	# Create emptry dataframe where we store all data for current page
 	general_df_for_page = pd.DataFrame([], columns=columns)
-	sleep(1)
-	wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'section-result-content')))
-	wait.until(EC.element_to_be_clickable((By.CLASS_NAME, 'section-result-content')))
-	elem = wait.until(EC.element_to_be_clickable((By.CLASS_NAME, 'section-result-header-container')))
+	sleep(1.5)
 	titles = driver.find_elements_by_class_name('section-result-title')
 	for i in range(len(titles)):
-		wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'section-result-content')))
-		wait.until(EC.element_to_be_clickable((By.CLASS_NAME, 'section-result-content')))
+		sleep(0.4)
 		titles = driver.find_elements_by_class_name('section-result-content')
-		sleep(0.3)
+		sleep(0.4)
 		titles[i].click()
 		sleep(0.1)
 		rest = parse_one_restaurant()
@@ -119,7 +117,7 @@ def main():
 	columns = ['name', 'category', 'cost', 'rating', 'num_of_rates', 'open_hours'] + all_possible_tags
 	general_df_for_all = pd.DataFrame([], columns=columns)
 
-	for i in range(5):
+	for _ in range(5):
 		df = parse_one_page()
 		print(df.shape)
 		general_df_for_all = general_df_for_all.append(df, ignore_index=True)
